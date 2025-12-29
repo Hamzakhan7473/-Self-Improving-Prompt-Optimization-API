@@ -90,7 +90,7 @@ def get_evaluation_results(
             "dataset_id": r.dataset_id,
             "dimension": r.dimension,
             "score": r.score,
-            "metadata": r.metadata,
+            "metadata": r.meta_data,
             "created_at": r.created_at.isoformat()
         }
         for r in results

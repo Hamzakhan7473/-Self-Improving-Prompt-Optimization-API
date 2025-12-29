@@ -234,7 +234,7 @@ def self_improve(
             template=candidate_data["template"],
             schema_definition=prompt_version.schema_definition,
             metadata={
-                **(prompt_version.metadata or {}),
+                **(prompt_version.meta_data or {}),
                 "improvement_rationale": candidate_data.get("rationale", "")
             },
             parent_version_id=version_id,

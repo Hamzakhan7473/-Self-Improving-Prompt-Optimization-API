@@ -36,7 +36,7 @@ class EvaluationResult(Base):
     dataset_id = Column(String, nullable=False)
     dimension = Column(String, nullable=False)
     score = Column(Float, nullable=False)
-    metadata = Column(JSON, nullable=True)
+    meta_data = Column("metadata", JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     prompt_version = relationship("PromptVersion", back_populates="evaluation_results")
@@ -51,7 +51,7 @@ class PromptVersion(Base):
     version = Column(String, nullable=False)
     template = Column(Text, nullable=False)
     schema_definition = Column(JSON, nullable=True)
-    metadata = Column(JSON, nullable=True)
+    meta_data = Column("metadata", JSON, nullable=True)
     parent_version_id = Column(Integer, ForeignKey("prompt_versions.id"), nullable=True)
     status = Column(String, default=PromptStatus.DRAFT.value)
     created_at = Column(DateTime, default=datetime.utcnow)
