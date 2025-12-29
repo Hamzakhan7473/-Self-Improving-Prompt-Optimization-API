@@ -1,0 +1,37 @@
+{
+  "dataset_id": "summarization_test",
+  "metadata": {
+    "description": "Sample dataset for summarization task",
+    "domain": "general"
+  },
+  "cases": [
+    {
+      "index": 0,
+      "input": {
+        "text": "Artificial intelligence has revolutionized many industries, from healthcare to finance. Machine learning algorithms can now diagnose diseases, predict market trends, and automate complex processes. However, ethical concerns about AI bias and job displacement remain important topics for discussion."
+      },
+      "expected_output": "AI has transformed industries like healthcare and finance through machine learning, but raises ethical concerns about bias and job displacement.",
+      "rubric": "Should be 2-3 sentences, capture main points, be concise",
+      "metadata": {
+        "critical": true
+      }
+    },
+    {
+      "index": 1,
+      "input": {
+        "text": "Climate change is one of the most pressing challenges of our time. Rising global temperatures, melting ice caps, and extreme weather events are clear indicators of the problem. Scientists agree that immediate action is needed to reduce greenhouse gas emissions and transition to renewable energy sources."
+      },
+      "expected_output": "Climate change poses urgent challenges with rising temperatures and extreme weather, requiring immediate action on emissions and renewable energy.",
+      "rubric": "Should be 2-3 sentences, capture main points, be concise"
+    },
+    {
+      "index": 2,
+      "input": {
+        "text": "The internet has connected billions of people worldwide, enabling instant communication and access to information. Social media platforms have transformed how we share news and interact with others. However, this connectivity also brings challenges like misinformation and privacy concerns."
+      },
+      "expected_output": "The internet connects billions globally, transforming communication and information access, but also raises issues of misinformation and privacy.",
+      "rubric": "Should be 2-3 sentences, capture main points, be concise"
+    }
+  ]
+}
+
