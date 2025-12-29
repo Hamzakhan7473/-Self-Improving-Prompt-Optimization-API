@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from config import settings
 from storage import init_db
-from api import prompts, inference, evaluation, improvement, ab_testing
+from api import prompts, inference, evaluation, improvement, ab_testing, audit
 
 
 @asynccontextmanager
@@ -40,6 +40,7 @@ app.include_router(inference.router)
 app.include_router(evaluation.router)
 app.include_router(improvement.router)
 app.include_router(ab_testing.router)
+app.include_router(audit.router)
 
 
 @app.get("/")

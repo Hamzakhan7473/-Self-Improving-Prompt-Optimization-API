@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any, List
 import openai
 import anthropic
 from config import settings
+from utils.cache import get_cache
 
 
 class LLMClient:
@@ -37,9 +38,18 @@ class LLMClient:
         system_prompt: Optional[str] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        use_cache: bool = True,
         **kwargs
     ) -> str:
-        """Generate completion from LLM."""
+        """Generate completion from LLM with optional caching."""
+        cache = get_cache()
+        
+        # Check cache if enabled
+        if use_cache and settings.enable_cache:
+            cached_response = cache.get(prompt, system_prompt, model=self.model, provider=self.provider)
+            if cached_response is not None:
+                return cached_response
+        
         temp = temperature if temperature is not None else self.temperature
         max_toks = max_tokens if max_tokens is not None else self.max_tokens
         
@@ -56,7 +66,13 @@ class LLMClient:
                 max_tokens=max_toks,
                 **kwargs
             )
-            return response.choices[0].message.content
+            result = response.choices[0].message.content
+            
+            # Cache result if enabled
+            if use_cache and settings.enable_cache:
+                cache.set(prompt, result, system_prompt, model=self.model, provider=self.provider)
+            
+            return result
         
         elif self.provider == "anthropic":
             response = self.client.messages.create(
@@ -67,7 +83,13 @@ class LLMClient:
                 messages=[{"role": "user", "content": prompt}],
                 **kwargs
             )
-            return response.content[0].text
+            result = response.content[0].text
+            
+            # Cache result if enabled
+            if use_cache and settings.enable_cache:
+                cache.set(prompt, result, system_prompt, model=self.model, provider=self.provider)
+            
+            return result
     
     def complete_json(
         self,

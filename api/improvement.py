@@ -272,7 +272,8 @@ def self_improve(
         if best_candidate["should_promote"]:
             promoter.promote(
                 best_candidate["experiment"]["experiment_id"],
-                best_candidate["candidate_version_id"]
+                best_candidate["candidate_version_id"],
+                rationale=best_candidate["experiment"].get("promotion_rationale")
             )
             promoted_version = best_candidate["candidate_version_id"]
     
