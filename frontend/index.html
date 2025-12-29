@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Optimizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prompt Optimizer</h1>
+            <p class="subtitle">Version control and automated optimization for AI prompts</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="prompts"><span>Prompts</span></button>
+            <button class="tab-btn" data-tab="inference"><span>Inference</span></button>
+            <button class="tab-btn" data-tab="evaluation"><span>Evaluation</span></button>
+            <button class="tab-btn" data-tab="improvement"><span>Self-Improvement</span></button>
+            <button class="tab-btn" data-tab="ab-testing"><span>A/B Testing</span></button>
+        </nav>
+
+        <!-- Prompts Tab -->
+        <div id="prompts" class="tab-content active">
+            <div class="glass-card">
+                <h2>Prompt Management</h2>
+                
+                <div class="section">
+                    <h3>Create New Prompt</h3>
+                    <form id="create-prompt-form">
+                    <div class="form-group">
+                        <label>Prompt ID:</label>
+                        <input type="text" id="prompt-id" placeholder="e.g., summarization_v1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Template:</label>
+                        <textarea id="prompt-template" rows="5" placeholder="Enter prompt template with {variables}..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Schema (JSON, optional):</label>
+                        <textarea id="prompt-schema" rows="4" placeholder='{"type": "object", "properties": {...}}'></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Metadata (JSON, optional):</label>
+                        <textarea id="prompt-metadata" rows="3" placeholder='{"task": "summarization", "domain": "general"}'></textarea>
+                    </div>
+                        <button type="submit"><span>Create Prompt</span></button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h3>List Prompts</h3>
+                    <button onclick="loadPrompts()"><span>Refresh List</span></button>
+                    <div id="prompts-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inference Tab -->
+        <div id="inference" class="tab-content">
+            <div class="glass-card">
+                <h2>Run Inference</h2>
+                <form id="inference-form">
+                <div class="form-group">
+                    <label>Prompt ID:</label>
+                    <input type="text" id="inference-prompt-id" placeholder="summarization_v1" required>
+                </div>
+                <div class="form-group">
+                    <label>Variables (JSON):</label>
+                    <textarea id="inference-variables" rows="4" placeholder='{"text": "Your text here..."}' required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Version (optional):</label>
+                    <input type="text" id="inference-version" placeholder="Leave empty for active version">
+                </div>
+                    <button type="submit"><span>Run Inference</span></button>
+                </form>
+                <div id="inference-result"></div>
+            </div>
+        </div>
+
+        <!-- Evaluation Tab -->
+        <div id="evaluation" class="tab-content">
+            <div class="glass-card">
+                <h2>Evaluate Prompt</h2>
+                <form id="evaluation-form">
+                <div class="form-group">
+                    <label>Prompt Version ID:</label>
+                    <input type="number" id="eval-version-id" placeholder="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Dataset (JSON):</label>
+                    <textarea id="eval-dataset" rows="10" placeholder='{"dataset_id": "test", "cases": [{"input": {...}, "expected_output": "..."}]}' required></textarea>
+                </div>
+                    <button type="submit"><span>Run Evaluation</span></button>
+                </form>
+                <div id="evaluation-result"></div>
+            </div>
+        </div>
+
+        <!-- Improvement Tab -->
+        <div id="improvement" class="tab-content">
+            <div class="glass-card">
+                <h2>Self-Improvement</h2>
+                <form id="improvement-form">
+                <div class="form-group">
+                    <label>Prompt Version ID:</label>
+                    <input type="number" id="improve-version-id" placeholder="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Dataset (JSON):</label>
+                    <textarea id="improve-dataset" rows="10" placeholder='{"dataset_id": "test", "cases": [...]}' required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="auto-promote"> Auto-promote best candidate
+                    </label>
+                </div>
+                    <button type="submit"><span>Run Self-Improvement</span></button>
+                </form>
+                <div id="improvement-result"></div>
+            </div>
+        </div>
+
+        <!-- A/B Testing Tab -->
+        <div id="ab-testing" class="tab-content">
+            <div class="glass-card">
+                <h2>A/B Testing</h2>
+                <div class="section">
+                    <h3>Select Version for Request</h3>
+                    <form id="ab-select-form">
+                    <div class="form-group">
+                        <label>Prompt ID:</label>
+                        <input type="text" id="ab-prompt-id" placeholder="summarization_v1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>User ID (optional, for consistent assignment):</label>
+                        <input type="text" id="ab-user-id" placeholder="user123">
+                    </div>
+                        <button type="submit"><span>Select Version</span></button>
+                    </form>
+                    <div id="ab-select-result"></div>
+                </div>
+
+                <div class="section">
+                    <h3>View Metrics</h3>
+                    <form id="ab-metrics-form">
+                        <div class="form-group">
+                            <label>Prompt ID:</label>
+                            <input type="text" id="ab-metrics-prompt-id" placeholder="summarization_v1" required>
+                        </div>
+                        <button type="submit"><span>Get Metrics</span></button>
+                    </form>
+                    <div id="ab-metrics-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

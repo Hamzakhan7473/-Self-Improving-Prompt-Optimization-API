@@ -40,7 +40,7 @@ class PromptStorage:
             version=version,
             template=template,
             schema_definition=schema_definition,
-            metadata=metadata or {},
+            meta_data=metadata or {},
             parent_version_id=parent_version_id,
             status=status.value
         )

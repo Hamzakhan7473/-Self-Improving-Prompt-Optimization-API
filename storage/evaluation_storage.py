@@ -27,7 +27,7 @@ class EvaluationStorage:
             dataset_id=dataset_id,
             dimension=dimension,
             score=score,
-            metadata=metadata or {}
+            meta_data=metadata or {}
         )
         
         self.db.add(result)

@@ -144,10 +144,10 @@ def get_diff(
     
     # Simple metadata diff
     metadata_diff = None
-    if from_version.metadata != to_version.metadata:
+    if from_version.meta_data != to_version.meta_data:
         metadata_diff = {
-            "old": from_version.metadata,
-            "new": to_version.metadata
+            "old": from_version.meta_data,
+            "new": to_version.meta_data
         }
     
     return PromptDiff(
