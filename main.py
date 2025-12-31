@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from config import settings
 from storage import init_db
-from api import prompts, inference, evaluation, improvement, ab_testing
+from api import prompts, inference, evaluation, improvement, ab_testing, audit
 
 
 @asynccontextmanager
@@ -25,13 +25,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, specify exact origins
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers
@@ -40,6 +41,7 @@ app.include_router(inference.router)
 app.include_router(evaluation.router)
 app.include_router(improvement.router)
 app.include_router(ab_testing.router)
+app.include_router(audit.router)
 
 
 @app.get("/")

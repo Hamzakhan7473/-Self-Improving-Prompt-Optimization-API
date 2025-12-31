@@ -7,9 +7,11 @@ from utils.validators import ValidatorRegistry
 from utils.llm_client import get_llm_client
 from utils.prompt_utils import render_prompt
 from evaluation.judge import LLMJudge
+from evaluation.blinded_evaluator import BlindedEvaluator
 from evaluation.dataset import Dataset
 from storage.evaluation_storage import EvaluationStorage
 from storage.prompt_storage import PromptStorage
+from utils.audit import get_audit_logger, AuditEventType
 
 
 class Evaluator:
@@ -19,13 +21,25 @@ class Evaluator:
         self,
         prompt_storage: PromptStorage,
         evaluation_storage: EvaluationStorage,
-        use_llm_judge: bool = True
+        use_llm_judge: bool = True,
+        use_blinded_evaluation: bool = True
     ):
         self.prompt_storage = prompt_storage
         self.evaluation_storage = evaluation_storage
         self.use_llm_judge = use_llm_judge
-        self.judge = LLMJudge() if use_llm_judge else None
+        self.use_blinded_evaluation = use_blinded_evaluation
+        
+        # Use blinded evaluator for strict leakage prevention
+        if use_blinded_evaluation:
+            self.blinded_evaluator = BlindedEvaluator()
+            self.judge = None
+        else:
+            self.judge = LLMJudge() if use_llm_judge else None
+            self.blinded_evaluator = None
+        
+        # Separate client for generation (different from evaluation)
         self.llm_client = get_llm_client()
+        self.audit_logger = get_audit_logger()
     
     def evaluate(
         self,
@@ -93,6 +107,21 @@ class Evaluator:
         passed_cases = sum(1 for r in per_case_results if r.get("passed", False))
         failed_cases = len(per_case_results) - passed_cases
         
+        # Log evaluation for audit trail
+        self.audit_logger.log(
+            AuditEventType.EVALUATION_RUN,
+            {
+                'dataset_id': dataset.dataset_id,
+                'aggregate_score': aggregate_score,
+                'total_cases': len(dataset.cases),
+                'passed_cases': passed_cases,
+                'failed_cases': failed_cases,
+                'dimensions_evaluated': [d.value for d in dimensions],
+                'blinded_evaluation': self.use_blinded_evaluation
+            },
+            prompt_version_id=prompt_version_id
+        )
+        
         return EvaluationResponse(
             prompt_version_id=prompt_version_id,
             dataset_id=dataset.dataset_id,
@@ -111,13 +140,19 @@ class Evaluator:
         case: Dict[str, Any],
         dimensions: List[EvaluationDimension]
     ) -> Dict[str, Any]:
-        """Evaluate a single test case."""
+        """Evaluate a single test case with blinded evaluation."""
         # Render prompt
         variables = case.get("input", {})
         filled_prompt = render_prompt(prompt_version.template, variables)
         
-        # Generate output
-        output = self.llm_client.complete(filled_prompt)
+        # Generate output using generation client (separate from evaluation)
+        if self.blinded_evaluator:
+            output = self.blinded_evaluator.generate_output(
+                prompt=filled_prompt,
+                prompt_version_id=prompt_version.id
+            )
+        else:
+            output = self.llm_client.complete(filled_prompt)
         
         # Evaluate on each dimension
         case_scores = []
@@ -170,8 +205,29 @@ class Evaluator:
                     # Partial credit for format issues
                     return {"score": 0.3, "details": details}
         
-        # Use LLM judge for other dimensions or as fallback
-        if self.judge:
+        # Use blinded evaluator or LLM judge
+        if self.blinded_evaluator:
+            # Use deterministic fallback first, then blinded LLM evaluation
+            judgment = self.blinded_evaluator.evaluate_with_deterministic_fallback(
+                output=output,
+                expected=case.get("expected_output"),
+                schema=prompt_version.schema_definition,
+                dimension=dimension.value
+            )
+            
+            # Ensure we have the expected structure
+            if isinstance(judgment, dict):
+                return {
+                    "score": judgment.get("score", 0.0),
+                    "details": {
+                        "explanation": judgment.get("explanation"),
+                        "method": judgment.get("method", "llm_judge"),
+                        "strengths": judgment.get("strengths", []),
+                        "weaknesses": judgment.get("weaknesses", []),
+                        "blinded": judgment.get("evaluation_metadata", {}).get("blinded", False)
+                    }
+                }
+        elif self.judge:
             judgment = self.judge.evaluate(
                 output=output,
                 expected=case.get("expected_output"),

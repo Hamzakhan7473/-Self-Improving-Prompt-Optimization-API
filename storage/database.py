@@ -21,9 +21,8 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 
-@contextmanager
-def get_db() -> Generator[Session, None, None]:
-    """Get database session context manager."""
+def get_db():
+    """Get database session dependency for FastAPI."""
     db = SessionLocal()
     try:
         yield db
@@ -33,4 +32,19 @@ def get_db() -> Generator[Session, None, None]:
         raise
     finally:
         db.close()
+
+
+@contextmanager
+def get_db_context() -> Generator[Session, None, None]:
+    """Get database session context manager (for non-FastAPI use)."""
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
 
