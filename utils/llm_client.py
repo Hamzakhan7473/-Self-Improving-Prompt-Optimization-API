@@ -1,7 +1,10 @@
 """LLM client for OpenAI and Anthropic."""
 from typing import Optional, Dict, Any, List
 import openai
-import anthropic
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
 from config import settings
 from utils.cache import get_cache
 
@@ -26,6 +29,8 @@ class LLMClient:
                 raise ValueError("OpenAI API key not configured")
             self.client = openai.OpenAI(api_key=settings.openai_api_key)
         elif self.provider == "anthropic":
+            if anthropic is None:
+                raise ValueError("Anthropic package not installed. Install with: pip install anthropic")
             if not settings.anthropic_api_key:
                 raise ValueError("Anthropic API key not configured")
             self.client = anthropic.Anthropic(api_key=settings.anthropic_api_key)

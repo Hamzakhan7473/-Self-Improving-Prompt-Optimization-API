@@ -34,6 +34,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
             headers: {
                 'Content-Type': 'application/json',
             },
+            mode: 'cors', // Explicitly enable CORS
         };
         
         if (body) {
@@ -41,15 +42,23 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         }
         
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        const data = await response.json();
         
+        // Check if response is ok
         if (!response.ok) {
-            throw new Error(data.detail || 'Request failed');
+            const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+            throw new Error(errorData.detail || `Request failed with status ${response.status}`);
         }
         
+        const data = await response.json();
         return data;
     } catch (error) {
-        showNotification(error.message, 'error');
+        // More detailed error messages
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            showNotification('Cannot connect to API server. Make sure backend is running on http://localhost:8000', 'error');
+        } else {
+            showNotification(error.message, 'error');
+        }
+        console.error('API Error:', error);
         throw error;
     }
 }
@@ -326,6 +335,25 @@ document.getElementById('ab-metrics-form').addEventListener('submit', async (e) 
     }
 });
 
-// Load prompts on page load
-loadPrompts();
+// Test API connection on page load
+async function testConnection() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        if (response.ok) {
+            console.log('✓ API connection successful');
+            loadPrompts();
+        } else {
+            showNotification('API server returned an error. Check if backend is running.', 'error');
+        }
+    } catch (error) {
+        console.error('✗ API connection failed:', error);
+        showNotification('Cannot connect to API server at http://localhost:8000. Make sure the backend is running.', 'error');
+    }
+}
+
+// Test connection and load prompts on page load
+testConnection();
 

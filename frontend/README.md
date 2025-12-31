@@ -40,3 +40,4 @@ Works in all modern browsers (Chrome, Firefox, Safari, Edge).
 - The API server must be running before using the frontend
 - For production, consider using a proper build tool like Vite or Create React App
 
+
