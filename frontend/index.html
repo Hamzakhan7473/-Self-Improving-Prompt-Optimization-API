@@ -3,159 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Optimizer</title>
+    <title>Prompt Optimizer - Self-Improving AI Prompts</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* iOS/Mac system font stack */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Better icon rendering on retina displays */
+        svg {
+            shape-rendering: geometricPrecision;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Prompt Optimizer</h1>
-            <p class="subtitle">Version control and automated optimization for AI prompts</p>
+            <div class="header-content">
+                <svg class="header-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+                    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+                </svg>
+                <h1>Prompt Optimizer</h1>
+            </div>
+            <p class="subtitle">Version control & automated optimization for AI prompts</p>
         </header>
 
+        <!-- Simple Navigation -->
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="prompts"><span>Prompts</span></button>
-            <button class="tab-btn" data-tab="inference"><span>Inference</span></button>
-            <button class="tab-btn" data-tab="evaluation"><span>Evaluation</span></button>
-            <button class="tab-btn" data-tab="improvement"><span>Self-Improvement</span></button>
-            <button class="tab-btn" data-tab="ab-testing"><span>A/B Testing</span></button>
+            <button class="tab-btn active" data-tab="create">Create Prompt</button>
+            <button class="tab-btn" data-tab="evaluate">Evaluate</button>
+            <button class="tab-btn" data-tab="improve">Auto-Improve</button>
+            <button class="tab-btn" data-tab="history">History</button>
         </nav>
 
-        <!-- Prompts Tab -->
-        <div id="prompts" class="tab-content active">
+        <!-- Create Prompt Tab -->
+        <div id="create" class="tab-content active">
             <div class="glass-card">
-                <h2>Prompt Management</h2>
+                <h2>Create New Prompt</h2>
+                <p class="help-text">Create versioned prompts with templates, variables, and structured output schemas. The system automatically tracks all versions.</p>
                 
-                <div class="section">
-                    <h3>Create New Prompt</h3>
-                    <form id="create-prompt-form">
-                    <div class="form-group">
-                        <label>Prompt ID:</label>
-                        <input type="text" id="prompt-id" placeholder="e.g., summarization_v1" required>
+                <div class="example-templates">
+                    <h3>
+                        <svg class="section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Quick Templates
+                    </h3>
+                    <div class="template-buttons">
+                        <button class="template-btn" data-template="qa">Question Answering</button>
+                        <button class="template-btn" data-template="summarization">Text Summarization</button>
+                        <button class="template-btn" data-template="classification">Classification</button>
+                        <button class="template-btn" data-template="extraction">Data Extraction</button>
                     </div>
-                    <div class="form-group">
-                        <label>Template:</label>
-                        <textarea id="prompt-template" rows="5" placeholder="Enter prompt template with {variables}..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Schema (JSON, optional):</label>
-                        <textarea id="prompt-schema" rows="4" placeholder='{"type": "object", "properties": {...}}'></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Metadata (JSON, optional):</label>
-                        <textarea id="prompt-metadata" rows="3" placeholder='{"task": "summarization", "domain": "general"}'></textarea>
-                    </div>
-                        <button type="submit"><span>Create Prompt</span></button>
-                    </form>
                 </div>
+                
+                <form id="create-prompt-form">
+                    <div class="form-group">
+                        <label>Prompt Name (ID):</label>
+                        <input type="text" id="prompt-id" placeholder="e.g., customer_support_qa" required>
+                        <small>Use descriptive names like: customer_support_qa, document_summarizer, sentiment_classifier</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Prompt Template:</label>
+                        <textarea id="prompt-template" rows="8" placeholder='You are a helpful assistant. Answer the following question based on the context provided.
 
-                <div class="section">
-                    <h3>List Prompts</h3>
-                    <button onclick="loadPrompts()"><span>Refresh List</span></button>
-                    <div id="prompts-list"></div>
-                </div>
-            </div>
-        </div>
+Context: {{context}}
+Question: {{question}}
 
-        <!-- Inference Tab -->
-        <div id="inference" class="tab-content">
-            <div class="glass-card">
-                <h2>Run Inference</h2>
-                <form id="inference-form">
-                <div class="form-group">
-                    <label>Prompt ID:</label>
-                    <input type="text" id="inference-prompt-id" placeholder="summarization_v1" required>
-                </div>
-                <div class="form-group">
-                    <label>Variables (JSON):</label>
-                    <textarea id="inference-variables" rows="4" placeholder='{"text": "Your text here..."}' required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Version (optional):</label>
-                    <input type="text" id="inference-version" placeholder="Leave empty for active version">
-                </div>
-                    <button type="submit"><span>Run Inference</span></button>
+Provide a clear, accurate answer.' required></textarea>
+                        <small>Use {{variable_name}} for placeholders. Example: {{text}}, {{question}}, {{category}}</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Expected Output Schema (JSON - Optional):</label>
+                        <textarea id="prompt-schema" rows="6" placeholder='{"type": "object", "properties": {"answer": {"type": "string"}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}}, "required": ["answer"]}'></textarea>
+                        <small>Define the structure of your output. Leave empty for free-form text responses.</small>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Create Prompt</span>
+                    </button>
                 </form>
-                <div id="inference-result"></div>
+                
+                <div id="create-result" class="result-area"></div>
             </div>
         </div>
 
-        <!-- Evaluation Tab -->
-        <div id="evaluation" class="tab-content">
+        <!-- Evaluate Tab -->
+        <div id="evaluate" class="tab-content">
             <div class="glass-card">
                 <h2>Evaluate Prompt</h2>
-                <form id="evaluation-form">
-                <div class="form-group">
-                    <label>Prompt Version ID:</label>
-                    <input type="number" id="eval-version-id" placeholder="1" required>
+                <p class="help-text">Test your prompts against test cases. The system evaluates across multiple dimensions: correctness, format adherence, verbosity, safety, and consistency.</p>
+                
+                <div class="example-templates">
+                    <h3>
+                        <svg class="section-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Example Test Cases
+                    </h3>
+                    <button class="example-btn" data-example="qa">Load QA Examples</button>
+                    <button class="example-btn" data-example="summarization">Load Summarization Examples</button>
                 </div>
-                <div class="form-group">
-                    <label>Dataset (JSON):</label>
-                    <textarea id="eval-dataset" rows="10" placeholder='{"dataset_id": "test", "cases": [{"input": {...}, "expected_output": "..."}]}' required></textarea>
-                </div>
-                    <button type="submit"><span>Run Evaluation</span></button>
+                
+                <form id="evaluate-form">
+                    <div class="form-group">
+                        <label>Select Prompt:</label>
+                        <select id="eval-prompt-select" required>
+                            <option value="">Loading prompts...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Test Cases (One per line, JSON format):</label>
+                        <textarea id="eval-test-cases" rows="10" placeholder='{"input": {"question": "What is the capital of France?", "context": "France is a country in Europe"}, "expected": "Paris"}
+{"input": {"question": "What is 2+2?", "context": "Basic math"}, "expected": "4"}' required></textarea>
+                        <small>Each line: JSON with "input" (variables) and "expected" (expected output)</small>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <span>Run Evaluation</span>
+                    </button>
                 </form>
-                <div id="evaluation-result"></div>
+                
+                <div id="evaluate-result" class="result-area"></div>
             </div>
         </div>
 
-        <!-- Improvement Tab -->
-        <div id="improvement" class="tab-content">
+        <!-- Auto-Improve Tab -->
+        <div id="improve" class="tab-content">
             <div class="glass-card">
-                <h2>Self-Improvement</h2>
-                <form id="improvement-form">
-                <div class="form-group">
-                    <label>Prompt Version ID:</label>
-                    <input type="number" id="improve-version-id" placeholder="1" required>
-                </div>
-                <div class="form-group">
-                    <label>Dataset (JSON):</label>
-                    <textarea id="improve-dataset" rows="10" placeholder='{"dataset_id": "test", "cases": [...]}' required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="auto-promote"> Auto-promote best candidate
-                    </label>
-                </div>
-                    <button type="submit"><span>Run Self-Improvement</span></button>
+                <h2>Auto-Improve Prompt</h2>
+                <p class="help-text">Let AI analyze failures, generate better prompt candidates, run A/B tests, and automatically promote the best version based on evaluation metrics.</p>
+                
+                <form id="improve-form">
+                    <div class="form-group">
+                        <label>Select Prompt to Improve:</label>
+                        <select id="improve-prompt-select" required>
+                            <option value="">Loading prompts...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Test Cases (Same format as evaluation):</label>
+                        <textarea id="improve-test-cases" rows="10" placeholder='{"input": {"question": "What is the capital of France?", "context": "France is a country in Europe"}, "expected": "Paris"}' required></textarea>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="auto-promote" checked>
+                            <span>Auto-promote best candidate (if it meets improvement thresholds)</span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.364-6.364l-4.243 4.243M7.879 16.121l-4.243 4.243m12.728 0l-4.243-4.243M7.879 7.879L3.636 3.636"></path>
+                        </svg>
+                        <span>Start Auto-Improvement</span>
+                    </button>
                 </form>
-                <div id="improvement-result"></div>
+                
+                <div id="improve-result" class="result-area"></div>
             </div>
         </div>
 
-        <!-- A/B Testing Tab -->
-        <div id="ab-testing" class="tab-content">
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
             <div class="glass-card">
-                <h2>A/B Testing</h2>
-                <div class="section">
-                    <h3>Select Version for Request</h3>
-                    <form id="ab-select-form">
-                    <div class="form-group">
-                        <label>Prompt ID:</label>
-                        <input type="text" id="ab-prompt-id" placeholder="summarization_v1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>User ID (optional, for consistent assignment):</label>
-                        <input type="text" id="ab-user-id" placeholder="user123">
-                    </div>
-                        <button type="submit"><span>Select Version</span></button>
-                    </form>
-                    <div id="ab-select-result"></div>
+                <h2>Prompt History & Transparency</h2>
+                <p class="help-text">View all your prompts, their versions, evaluation results, and improvement history. Complete audit trail for every change.</p>
+                
+                <div class="form-group">
+                    <label>Select Prompt:</label>
+                    <select id="history-prompt-select">
+                        <option value="">All prompts...</option>
+                    </select>
                 </div>
-
-                <div class="section">
-                    <h3>View Metrics</h3>
-                    <form id="ab-metrics-form">
-                        <div class="form-group">
-                            <label>Prompt ID:</label>
-                            <input type="text" id="ab-metrics-prompt-id" placeholder="summarization_v1" required>
-                        </div>
-                        <button type="submit"><span>Get Metrics</span></button>
-                    </form>
-                    <div id="ab-metrics-result"></div>
+                
+                <div id="history-content">
+                    <div class="loading">Loading prompt history...</div>
                 </div>
             </div>
         </div>
@@ -166,4 +214,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-

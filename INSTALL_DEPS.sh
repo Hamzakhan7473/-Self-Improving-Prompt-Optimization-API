@@ -19,3 +19,4 @@ echo ""
 echo "Now you can start the backend:"
 echo "  python3 main.py"
 
+

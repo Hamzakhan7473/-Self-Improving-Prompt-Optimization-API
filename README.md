@@ -2,6 +2,8 @@
 
 A production-ready system for versioned prompt management with automated evaluation and self-improvement capabilities. This API provides "CI/CD for prompts" suitable for production LLM systems.
 
+> **Research-Based**: This system implements best practices from [LangChain's prompt optimization research](https://blog.langchain.com/exploring-prompt-optimization/), [Prompting Guide](https://www.promptingguide.ai/guides/optimizing-prompts), and industry leaders. See [RESEARCH_REFERENCES.md](RESEARCH_REFERENCES.md) for details.
+
 ## Architecture
 
 ![System Architecture](Self-Improving%20Prompt%20Optimization%20API%20—%20Clean%203-Layer%20Architecture.jpg)
@@ -189,20 +191,53 @@ Key configuration options in `.env`:
 
 ## Evaluation Leakage Prevention
 
-The system implements several measures to prevent evaluation leakage:
+The system implements several measures to prevent evaluation leakage, critical for reliable optimization:
 
-1. **Blinded Judges**: LLM judges are blinded to prompt version identity
-2. **Separate Roles**: Generation and evaluation use separate LLM instances
-3. **Deterministic Validators**: Use schema/regex validators where possible
-4. **Low-Variance Evaluation**: Evaluation models use temperature=0.0
+1. **Blinded Judges**: LLM judges are blinded to prompt version identity (see [LangChain's research](https://blog.langchain.com/exploring-prompt-optimization/))
+2. **Separate Roles**: Generation and evaluation use separate LLM instances to prevent bias
+3. **Deterministic Validators**: Use schema/regex validators where possible for objective evaluation
+4. **Low-Variance Evaluation**: Evaluation models use temperature=0.0 for consistent scoring
+
+### Importance of Verifiable Outcomes
+
+As highlighted in [LangChain's prompt optimization research](https://blog.langchain.com/exploring-prompt-optimization/), optimization works best with **verifiable outcomes**:
+
+- Clear, measurable success criteria
+- Objective evaluation metrics
+- Ground truth labels where possible
+- Programmatically checkable constraints
+
+Optimizing against fuzzy or unreliable metrics often makes prompts worse, not better. The system emphasizes deterministic validators and clear evaluation criteria.
 
 ## Self-Improvement Process
 
-1. **Evaluate**: Run current prompt version on dataset
-2. **Analyze**: Identify failure patterns and common issues
-3. **Generate**: Create candidate improvements with rationales
+The system implements a comprehensive self-improvement loop based on research from [LangChain's prompt optimization study](https://blog.langchain.com/exploring-prompt-optimization/) and industry best practices:
+
+1. **Evaluate**: Run current prompt version on dataset with verifiable outcomes
+2. **Analyze**: Identify failure patterns and common issues using failure analysis
+3. **Generate**: Create candidate improvements using meta-prompting techniques
 4. **Experiment**: Run A/B tests comparing candidates to baseline
-5. **Promote**: Conditionally promote based on guardrails
+5. **Promote**: Conditionally promote based on guardrails and improvement thresholds
+
+### Optimization Techniques
+
+The system uses multiple optimization approaches:
+
+- **Meta-Prompting**: LLM-driven prompt improvement based on failure analysis and evaluation results
+- **Failure-Driven Optimization**: Targeted improvements based on specific failure cases
+- **A/B Testing**: Systematic comparison of candidate prompts against baseline
+- **Evolutionary Approach**: Multiple candidate generation with selection of best performers
+
+### When Prompt Optimization Works Best
+
+Based on research, prompt optimization is most effective when:
+
+- **Models lack domain knowledge**: Optimization can show ~200% increase in accuracy
+- **Clear patterns exist**: Rules, preferences, or conditional logic that can be learned
+- **Verifiable outcomes**: Evaluation metrics are clear and measurable
+- **Structured tasks**: Tasks with well-defined success criteria
+
+For tasks where the model already has strong domain knowledge, few-shot prompting may be more effective than instruction tuning alone.
 
 ## Dataset Format
 

@@ -229,6 +229,7 @@ def self_improve(
     
     for candidate_data in candidates:
         # Create candidate version
+        from models import PromptStatus
         candidate_version = storage.create_version(
             prompt_id=prompt_version.prompt_id,
             template=candidate_data["template"],
@@ -238,7 +239,7 @@ def self_improve(
                 "improvement_rationale": candidate_data.get("rationale", "")
             },
             parent_version_id=version_id,
-            status="experimental"
+            status=PromptStatus.EXPERIMENTAL
         )
         
         # Run experiment

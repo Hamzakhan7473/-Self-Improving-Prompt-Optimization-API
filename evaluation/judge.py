@@ -72,7 +72,8 @@ class LLMJudge:
 
 You are blinded to which prompt version generated this output. Evaluate based solely on the output quality.
 
-Provide a score from 0.0 to 1.0 and a brief explanation."""
+CRITICAL: You MUST respond with valid JSON only. Do not include any text before or after the JSON.
+Your response must be a JSON object with "score" (number 0.0-1.0) and "explanation" (string) fields."""
     
     def _build_evaluation_prompt(
         self,
@@ -96,7 +97,9 @@ Provide a score from 0.0 to 1.0 and a brief explanation."""
         
         parts.append(f"Actual output: {output}")
         parts.append(f"\nEvaluate this output on the dimension: {dimension}")
-        parts.append("Provide a score (0.0-1.0) and explanation.")
+        parts.append("\nIMPORTANT: Respond with ONLY valid JSON. Format:")
+        parts.append('{"score": 0.0-1.0, "explanation": "your explanation here"}')
+        parts.append("\nDo not include any text outside the JSON object.")
         
         return "\n\n".join(parts)
     

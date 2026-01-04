@@ -12,13 +12,23 @@ echo "📦 Staging all changes..."
 git add -A
 
 echo ""
-echo "🔒 Verifying .env is not staged..."
+echo "🔒 Verifying no secrets are staged..."
+# Check for .env file
 if git diff --cached --name-only | grep -q "\.env$"; then
     echo "⚠️  WARNING: .env file is staged! Removing it..."
     git reset HEAD .env
     echo "✓ .env removed from staging"
 else
     echo "✓ .env is not staged (protected by .gitignore)"
+fi
+
+# Check for API keys in staged files
+if git diff --cached | grep -qE "sk-proj-[A-Za-z0-9_-]+|sk-ant-[A-Za-z0-9_-]+"; then
+    echo "⚠️  WARNING: API keys found in staged files!"
+    echo "   Please remove API keys from scripts before pushing."
+    exit 1
+else
+    echo "✓ No API keys found in staged files"
 fi
 
 echo ""

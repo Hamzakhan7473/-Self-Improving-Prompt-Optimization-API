@@ -106,21 +106,33 @@ class LLMClient:
         """Generate JSON completion with schema validation."""
         import json
         
-        if self.provider == "openai" and schema:
-            # Use structured outputs if available
+        # For OpenAI, use response_format to force JSON output
+        if self.provider == "openai":
             try:
-                response = self.client.beta.chat.completions.parse(
+                messages = []
+                if system_prompt:
+                    messages.append({"role": "system", "content": system_prompt})
+                # Add explicit JSON instruction to user message
+                json_prompt = prompt + "\n\nIMPORTANT: Respond with ONLY valid JSON. No text before or after."
+                messages.append({"role": "user", "content": json_prompt})
+                
+                response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=[
-                        {"role": "system", "content": system_prompt or ""},
-                        {"role": "user", "content": prompt}
-                    ],
-                    response_format={"type": "json_schema", "json_schema": {"schema": schema}},
+                    messages=messages,
+                    response_format={"type": "json_object"},  # Force JSON output
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
                     **kwargs
                 )
-                return json.loads(response.choices[0].message.content)
-            except Exception:
-                # Fallback to regular completion
+                result = json.loads(response.choices[0].message.content)
+                # Basic validation
+                if schema and "required" in schema:
+                    for field in schema["required"]:
+                        if field not in result:
+                            raise ValueError(f"Missing required field: {field}")
+                return result
+            except Exception as e:
+                # Fallback to regular completion with parsing
                 pass
         
         # Fallback: regular completion with JSON parsing
@@ -143,7 +155,29 @@ class LLMClient:
             start = response_text.find("{")
             end = response_text.rfind("}") + 1
             if start >= 0 and end > start:
-                return json.loads(response_text[start:end])
+                try:
+                    return json.loads(response_text[start:end])
+                except json.JSONDecodeError:
+                    pass
+            
+            # Last resort: try to extract score and explanation from text
+            # Look for patterns like "Score: 0.5" or "score: 0.5"
+            import re
+            score_match = re.search(r'(?:score|Score)[:\s]+([0-9.]+)', response_text, re.IGNORECASE)
+            explanation_match = re.search(r'(?:explanation|Explanation)[:\s]+(.+?)(?:\n\n|\nScore|$)', response_text, re.IGNORECASE | re.DOTALL)
+            
+            if score_match:
+                try:
+                    score = float(score_match.group(1))
+                    score = max(0.0, min(1.0, score))  # Clamp to 0-1
+                    explanation = explanation_match.group(1).strip() if explanation_match else "No explanation provided"
+                    return {
+                        "score": score,
+                        "explanation": explanation
+                    }
+                except (ValueError, AttributeError):
+                    pass
+            
             raise ValueError(f"Could not parse JSON from response: {response_text[:200]}")
 
 
