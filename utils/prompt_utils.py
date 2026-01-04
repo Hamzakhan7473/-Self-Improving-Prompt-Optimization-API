@@ -29,3 +29,4 @@ def validate_variables(template: str, provided: Dict[str, Any]) -> tuple[bool, S
     return len(missing) == 0, missing
 
 
+

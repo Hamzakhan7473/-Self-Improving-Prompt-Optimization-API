@@ -45,7 +45,7 @@ def create_prompt(
         parent_version_id=parent_version_id
     )
     
-    return PromptVersionResponse.model_validate(version)
+    return PromptVersionResponse.from_orm(version)
 
 
 @router.get("/", response_model=List[PromptVersionResponse])
@@ -61,7 +61,7 @@ def list_prompts(
     status_enum = PromptStatus(status) if status else None
     versions = storage.list_versions(prompt_id=prompt_id, status=status_enum)
     
-    return [PromptVersionResponse.model_validate(v) for v in versions]
+    return [PromptVersionResponse.from_orm(v) for v in versions]
 
 
 @router.get("/{prompt_id}/versions", response_model=List[PromptVersionResponse])
@@ -73,7 +73,7 @@ def list_versions(
     storage = PromptStorage(db)
     versions = storage.list_versions(prompt_id=prompt_id)
     
-    return [PromptVersionResponse.model_validate(v) for v in versions]
+    return [PromptVersionResponse.from_orm(v) for v in versions]
 
 
 @router.get("/{prompt_id}/active", response_model=PromptVersionResponse)
@@ -91,7 +91,7 @@ def get_active_version(
             detail=f"No active version found for prompt {prompt_id}"
         )
     
-    return PromptVersionResponse.model_validate(version)
+    return PromptVersionResponse.from_orm(version)
 
 
 @router.get("/versions/{version_id}", response_model=PromptVersionResponse)
@@ -106,7 +106,7 @@ def get_version(
     if not version:
         raise HTTPException(status_code=404, detail="Version not found")
     
-    return PromptVersionResponse.model_validate(version)
+    return PromptVersionResponse.from_orm(version)
 
 
 @router.get("/versions/{version_id}/lineage", response_model=List[PromptVersionResponse])
@@ -207,7 +207,7 @@ def promote_version(
     
     try:
         version = storage.promote_version(version_id)
-        return PromptVersionResponse.model_validate(version)
+        return PromptVersionResponse.from_orm(version)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

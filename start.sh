@@ -46,3 +46,4 @@ echo "📋 Check logs:"
 echo "   tail -f backend.log"
 echo "   tail -f frontend.log"
 
+

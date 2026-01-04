@@ -117,6 +117,23 @@ class PromptVersionResponse(BaseModel):
     promoted_at: Optional[datetime]
     
     model_config = {"from_attributes": True}
+    
+    @classmethod
+    def from_orm(cls, obj):
+        """Convert from ORM object, handling meta_data field."""
+        data = {
+            "id": obj.id,
+            "prompt_id": obj.prompt_id,
+            "version": obj.version,
+            "template": obj.template,
+            "schema_definition": obj.schema_definition,
+            "metadata": obj.meta_data if obj.meta_data else None,
+            "parent_version_id": obj.parent_version_id,
+            "status": obj.status,
+            "created_at": obj.created_at,
+            "promoted_at": obj.promoted_at
+        }
+        return cls(**data)
 
 
 class EvaluationRequest(BaseModel):

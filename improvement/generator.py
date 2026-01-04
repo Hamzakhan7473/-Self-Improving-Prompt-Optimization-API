@@ -31,7 +31,8 @@ class ImprovementGenerator:
         
         system_prompt = """You are an expert prompt engineer. Your task is to improve prompts based on failure analysis.
 
-Generate improved prompt candidates that address the identified issues. Provide clear rationales for each improvement."""
+CRITICAL: You MUST respond with valid JSON only. Do not include any text before or after the JSON.
+Your response must be a JSON object with a "candidates" array containing improved prompt templates."""
         
         # Generate candidates
         response = self.llm_client.complete_json(
@@ -60,11 +61,19 @@ Generate improved prompt candidates that address the identified issues. Provide 
             "Failure analysis:",
             json.dumps(failure_analysis, indent=2),
             "",
-            "Generate improved prompt candidates that address the identified issues.",
-            "For each candidate, provide:",
-            "1. The improved template",
-            "2. A clear rationale explaining what was changed and why",
-            "3. Expected improvements (which dimensions should improve)"
+            "Your task: Generate improved prompt candidates that address the identified issues.",
+            "",
+            "IMPORTANT: Respond with ONLY valid JSON. Format:",
+            '{"candidates": [{"template": "improved template here", "rationale": "explanation", "expected_improvements": {...}}]}',
+            "",
+            "Requirements for each candidate:",
+            "1. template: The improved prompt template (must be different from current)",
+            "2. rationale: Clear explanation of what changed and why",
+            "3. expected_improvements: Object with dimension names and expected score improvements (0.0-1.0)",
+            "4. changes_summary: Brief summary of changes (optional)",
+            "",
+            "Do NOT return the current template. Generate NEW improved versions.",
+            "Do NOT include any text outside the JSON object."
         ]
         
         return "\n".join(parts)
@@ -108,5 +117,6 @@ Generate improved prompt candidates that address the identified issues. Provide 
             },
             "required": ["candidates"]
         }
+
 
 
